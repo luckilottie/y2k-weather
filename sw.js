@@ -1,4 +1,4 @@
-const CACHE_NAME = 'mermaid-weather-v1';
+const CACHE_NAME = 'Weather-v1';
 const urlsToCache = [
   '/Weather/',
   '/Weather/index.html'
