@@ -1,8 +1,8 @@
 {
-  "name": "Mermaid Weather",
+  "name": "Weather",
   "short_name": "Weather 🫧",
-  "description": "Hyper-local Y2K Mermaid Moe weather predictions!",
-  "start_url": "/y2k-weather/index.html",
+  "description": "local weather predictions!",
+  "start_url": "/Weather/index.html",
   "display": "standalone",
   "background_color": "#ff85c2",
   "theme_color": "#00f0ff",
