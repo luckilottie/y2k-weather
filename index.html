@@ -13,6 +13,9 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;700&display=swap" rel="stylesheet">
 
+    <script src="flora_db.js"></script>
+    <script src="climate_db.js"></script>
+
     <style>
         :root {
             --mermaid-aqua: #00f0ff;
@@ -67,7 +70,6 @@
             text-shadow: 2px 2px var(--moe-pink), -2px -2px var(--mermaid-aqua);
         }
 
-        /* ✨ NEW SEARCH BAR STYLES ✨ */
         .search-box {
             display: flex;
             gap: 8px;
@@ -255,27 +257,147 @@
         #cloud-scanner-output { font-size: 0.85rem; color: var(--deep-sea); margin-top: 15px; line-height: 1.4; width: 100%; text-align: center; border-top: 2px dotted rgba(255,255,255,0.5); padding-top: 10px; }
         .uv-message { font-size: 0.9rem; color: var(--moe-pink); margin-top: 5px; font-weight: 700;}
 
+        /* ✨ AGRONOMY LIST STYLES ✨ */
+        .zone-header {
+            font-size: 0.85rem;
+            color: var(--moe-pink);
+            font-weight: 700;
+            margin: 15px 0 10px 0;
+            text-transform: uppercase;
+            border-bottom: 2px dotted white;
+            padding-bottom: 5px;
+        }
+
+        .agronomy-card {
+            background: var(--inner-bubble);
+            border: 2px solid white;
+            border-radius: 20px;
+            padding: 12px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            text-align: left;
+            box-shadow: 2px 2px 8px rgba(0, 240, 255, 0.15);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            cursor: pointer;
+            flex-wrap: wrap;
+        }
+        
+        .agronomy-card:active { transform: scale(0.98); }
+
+        .plant-stamp {
+            width: 70px;
+            height: 70px;
+            border-radius: 10px;
+            border: 2px dashed white;
+            object-fit: cover;
+            background: var(--bubble-glass);
+            flex-shrink: 0;
+            box-shadow: 0 0 5px var(--mermaid-aqua);
+        }
+
+        .plant-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .plant-name {
+            font-weight: 700;
+            color: var(--deep-sea);
+            font-size: 0.95rem;
+            margin-bottom: 5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            text-shadow: 1px 1px 0px white;
+        }
+
+        .plant-toxicity {
+            font-size: 0.85rem;
+            filter: drop-shadow(1px 1px 0px white);
+        }
+
+        .plant-tag {
+            font-size: 0.65rem;
+            font-weight: 700;
+            padding: 4px 8px;
+            border-radius: 10px;
+            display: inline-block;
+            margin-bottom: 6px;
+            color: white;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            line-height: 1.3;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+            border: 1px solid rgba(255,255,255,0.5);
+        }
+
+        .tag-max { background: linear-gradient(135deg, #00f0ff, #00d084); }
+        .tag-shade { background: linear-gradient(135deg, #ffb347, #ff85c2); }
+        .tag-sanctuary { background: linear-gradient(135deg, #a8a8a8, #7a7a7a); }
+        
+        .plant-reason {
+            font-size: 0.75rem;
+            color: var(--deep-sea);
+            line-height: 1.25;
+            text-shadow: 1px 1px 0px rgba(255,255,255,0.8);
+        }
+
+        .plant-details-hidden {
+            display: none;
+            width: 100%;
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 2px dotted rgba(255,255,255,0.5);
+            font-size: 0.8rem;
+            color: var(--deep-sea);
+        }
+
+        .agronomy-card.expanded .plant-details-hidden {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .plant-stat-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+            text-shadow: 1px 1px 0px white;
+        }
+
+        .plant-stat-row span {
+            color: var(--moe-pink);
+            font-weight: 700;
+        }
+
         .minutely-grid { display: flex; width: 100%; justify-content: space-between; gap: 5px; margin-top: 5px; }
         .minutely-col { flex: 1; background: var(--bubble-glass); border-radius: 10px; padding: 8px 2px; font-size: 0.75rem; border: 1px dotted white; box-shadow: inset 1px 1px 5px rgba(255,255,255,0.5); }
         .minutely-time { font-weight: 700; color: var(--moe-pink); margin-bottom: 3px; text-shadow: 1px 1px 0px white;}
         .minutely-val { font-weight: 700; text-shadow: 1px 1px 0px white; }
 
+        /* ✨ UPDATED: HOURLY CARDS TO STACK PRECIPITATION ✨ */
         .hourly-container { display: flex; overflow-x: auto; gap: 10px; padding-bottom: 10px; margin-bottom: 15px; }
-        .hourly-box { min-width: 65px; background: var(--inner-bubble); border: 2px solid white; border-radius: 20px; padding: 10px; display: flex; flex-direction: column; align-items: center; box-shadow: 2px 2px 8px rgba(0, 240, 255, 0.15); }
+        .hourly-box { min-width: 65px; background: var(--inner-bubble); border: 2px solid white; border-radius: 20px; padding: 10px 5px; display: flex; flex-direction: column; align-items: center; box-shadow: 2px 2px 8px rgba(0, 240, 255, 0.15); }
         .hourly-time { font-size: 0.85rem; color: var(--moe-pink); text-shadow: 1px 1px 0px white; margin-bottom: 3px; font-weight: 700;}
         .hourly-icon { font-size: 1.3rem; filter: drop-shadow(2px 2px 0px white); margin: 3px 0; }
-        .hourly-temp { font-size: 1.1rem; font-weight: 700; color: var(--mermaid-aqua); text-shadow: 1px 1px 0px white; margin-top: 3px; }
-        .hourly-precip { font-size: 0.75rem; color: var(--deep-sea); font-weight: 700; margin-top: 3px; text-shadow: 1px 1px 0px white;}
+        .hourly-temp { font-size: 1.1rem; font-weight: 700; color: var(--mermaid-aqua); text-shadow: 1px 1px 0px white; margin-top: 3px; margin-bottom: 5px; }
+        .hourly-precip { font-size: 0.75rem; color: var(--deep-sea); font-weight: 700; line-height: 1.3; text-shadow: 1px 1px 0px white; margin-top: 2px; }
 
+        /* ✨ UPDATED: FORECAST ROWS FOR SPLIT COLUMNS ✨ */
         .forecast-title { font-size: 1.3rem; margin: 15px 0 10px 0; color: white; font-weight: 700; text-shadow: 2px 2px var(--mermaid-aqua), -1px -1px var(--moe-pink); border-bottom: 3px dotted white; padding-bottom: 5px; }
         .forecast-item { display: flex; flex-direction: column; background: var(--inner-bubble); margin-bottom: 10px; border-radius: 25px; border: 2px solid white; box-shadow: 2px 2px 8px rgba(0, 240, 255, 0.1); cursor: pointer; transition: transform 0.2s ease; }
         .forecast-item:active { transform: scale(0.98); }
-        .forecast-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 18px; font-size: 1rem; font-weight: 700; color: var(--deep-sea); text-shadow: 1px 1px 0px white; }
-        .forecast-day { width: 55px; text-align: left; color: var(--moe-pink); font-weight: 700;}
+        .forecast-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 14px; font-size: 0.95rem; font-weight: 700; color: var(--deep-sea); text-shadow: 1px 1px 0px white; }
+        .forecast-day { width: 50px; text-align: left; color: var(--moe-pink); font-weight: 700;}
         .forecast-icon { font-size: 1.3rem; filter: drop-shadow(2px 2px 0px white); }
-        .forecast-rain { font-size: 0.85rem; color: var(--mermaid-aqua); width: 45px; text-align: center; }
-        .forecast-temps { width: 80px; text-align: right; }
-        .min-temp { color: var(--mermaid-aqua); font-size: 0.9rem; margin-left: 5px;}
+        
+        .forecast-chance { width: 50px; text-align: center; color: var(--moe-pink); font-size: 0.85rem;}
+        .forecast-volume { width: 50px; text-align: center; color: var(--mermaid-aqua); font-size: 0.85rem;}
+        
+        .forecast-temps { width: 70px; text-align: right; }
+        .min-temp { color: var(--mermaid-aqua); font-size: 0.85rem; margin-left: 5px;}
+        
         .forecast-details { display: none; padding: 0 18px 15px 18px; font-size: 0.85rem; text-align: left; border-top: 2px dotted rgba(255, 255, 255, 0.5); margin-top: 5px; padding-top: 10px; }
         .forecast-details p { margin: 4px 0; color: var(--moe-pink); text-shadow: 1px 1px 0px white; }
         .forecast-details span { color: var(--deep-sea); }
@@ -484,6 +606,8 @@
                     <div class="vibe-title" style="margin-top: 15px; font-size: 1rem;">💧 Ambient Air Check</div>
                     <div class="vibe-desc" id="flora-humidity-guide">Checking moisture...</div>
                 </div>
+
+                <div id="agronomy-list"></div>
             </div>
 
             <div class="bottom-nav">
@@ -728,7 +852,6 @@
             }
         }
 
-        // ✨ HYPER-SENSITIVE DIORAMA LOGIC ✨
         function setAtmosphereScanner(low, mid, high, totalCover, isDay) {
             const box = document.getElementById('diorama-box');
             const scannerOutput = document.getElementById('cloud-scanner-output');
@@ -772,7 +895,6 @@
             }
         }
 
-        // ✨ SEARCH LOGIC ✨
         function handleSearchKeyPress(event) {
             if (event.key === "Enter") {
                 searchLocation();
@@ -804,7 +926,41 @@
             }
         }
 
-        // ✨ MAIN DATA FETCH FUNCTION ✨
+        function renderAgronomy(engineData) {
+            const container = document.getElementById('agronomy-list');
+            
+            container.innerHTML = `<div class="zone-header">📍 Est. Hardiness Zone: ${engineData.zone.zone}</div>`;
+            
+            engineData.recommendations.forEach(res => {
+                let tagClass = "tag-sanctuary";
+                if (res.status === "Maximum Vibe") tagClass = "tag-max";
+                if (res.status === "Shaded Canopy") tagClass = "tag-shade";
+
+                let toxIcon = res.plant.toxic_pets ? "💀🐾" : "🌿🐾";
+                let waterText = res.plant.water_frequency.replace('_', ' ');
+
+                container.innerHTML += `
+                    <div class="agronomy-card" onclick="this.classList.toggle('expanded')">
+                        <img src="${res.plant.stamp_img}" alt="${res.plant.name}" class="plant-stamp" onerror="this.src='https://i.postimg.cc/Fs9tVbff/d1fbe1c35c32494c9290ebf699c16fc6.jpg'">
+                        
+                        <div class="plant-info">
+                            <div class="plant-name">${res.plant.name} <span class="plant-toxicity">${toxIcon}</span></div>
+                            <div class="plant-tag ${tagClass}">${res.tag}</div>
+                            <div class="plant-reason">${res.reason}</div>
+                            
+                            <div class="plant-details-hidden">
+                                <div class="plant-stat-row"><span>🌡️ Temp Limits:</span> ${res.plant.temp_floor}°F to ${res.plant.temp_ceiling}°F</div>
+                                <div class="plant-stat-row"><span>🌸 Ideal Temp:</span> ${res.plant.optimal_temp[0]}°F to ${res.plant.optimal_temp[1]}°F</div>
+                                <div class="plant-stat-row"><span>💧 Water Needs:</span> ${waterText.toUpperCase()}</div>
+                                <div class="plant-stat-row"><span>🌬️ Max Wind:</span> ${res.plant.wind_tolerance} mph</div>
+                                <div class="plant-stat-row"><span>🌕 Lunar Boost:</span> ${res.plant.lunar_affinity.toUpperCase()}</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
         async function fetchWeatherData(latitude, longitude) {
             try {
                 let sunsetUtc = null;
@@ -826,31 +982,62 @@
                 const response = await fetch(weatherUrl);
                 const data = await response.json();
                 
-                const aqiUrl = `https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${latitude}&longitude=${longitude}&current=us_aqi,pm10,pm2_5,ozone&timezone=auto`;
-                const aqiRes = await fetch(aqiUrl);
-                const aqiData = await aqiRes.json();
+                let aqiData = null;
+                let aqiStatus = "-- (No Data)", pm25Status = "--", pm10Status = "--", ozoneStatus = "--";
+                try {
+                    const aqiUrl = `https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${latitude}&longitude=${longitude}&current=us_aqi,pm10,pm2_5,ozone&timezone=auto`;
+                    const aqiRes = await fetch(aqiUrl);
+                    aqiData = await aqiRes.json();
+                    
+                    if (aqiData && aqiData.current) {
+                        const aqi = aqiData.current.us_aqi || "--";
+                        if (aqi !== "--") {
+                            aqiStatus = `${aqi} (Good 🫧)`;
+                            if (aqi > 50) aqiStatus = `${aqi} (Moderate 🍂)`;
+                            if (aqi > 100) aqiStatus = `${aqi} (Poor ⚠️)`;
+                            if (aqi > 150) aqiStatus = `${aqi} (Hazardous 🚫)`;
+                        }
 
-                const current = data.current;
-                const daily = data.daily;
-                const hourly = data.hourly;
+                        const pm25 = aqiData.current.pm2_5 || "--";
+                        if (pm25 !== "--") pm25Status = pm25 > 35 ? "High ⚠️" : pm25 > 12 ? "Moderate 🍂" : "Low 🍃";
 
-                const currentTemp = Math.round(current.temperature_2m);
+                        const pm10 = aqiData.current.pm10 || "--";
+                        if (pm10 !== "--") pm10Status = pm10 > 154 ? "High ⚠️" : pm10 > 54 ? "Moderate 🍂" : "Low 🍃";
+
+                        const ozone = aqiData.current.ozone || "--";
+                        if (ozone !== "--") ozoneStatus = ozone > 120 ? "High ⚠️" : ozone > 60 ? "Moderate ☁️" : "Low 🌸";
+                        
+                        document.getElementById('aqi-pm25').innerText = pm25 !== "--" ? `${pm25} μg/m³ (${pm25Status})` : "--";
+                        document.getElementById('aqi-pm10').innerText = pm10 !== "--" ? `${pm10} μg/m³ (${pm10Status})` : "--";
+                        document.getElementById('aqi-ozone').innerText = ozone !== "--" ? `${ozone} μg/m³ (${ozoneStatus})` : "--";
+                    }
+                } catch (e) {
+                    console.log("AQI data unavailable for this location.");
+                }
+                document.getElementById('aqi-score').innerText = aqiStatus;
+
+                const current = data.current || {};
+                const daily = data.daily || {};
+                const hourly = data.hourly || {};
+
+                const currentTemp = Math.round(current.temperature_2m || 50);
                 document.getElementById('temp').innerText = currentTemp + "°";
-                document.getElementById('wind').innerText = Math.round(current.wind_speed_10m);
-                document.getElementById('gusts').innerText = Math.round(current.wind_gusts_10m);
+                document.getElementById('wind').innerText = Math.round(current.wind_speed_10m || 0);
+                document.getElementById('gusts').innerText = Math.round(current.wind_gusts_10m || 0);
                 
-                const currentHumidity = current.relative_humidity_2m;
+                const currentHumidity = current.relative_humidity_2m || 50;
                 document.getElementById('humidity').innerText = currentHumidity; 
                 setFloraVibe(currentHumidity);
-                document.getElementById('dewpoint').innerText = Math.round(current.dew_point_2m);
+                document.getElementById('dewpoint').innerText = Math.round(current.dew_point_2m || 50);
                 
-                const visMiles = (current.visibility / 1609.34).toFixed(1);
+                const visMiles = current.visibility ? (current.visibility / 1609.34).toFixed(1) : "--";
                 document.getElementById('visibility').innerText = visMiles;
                 
                 const currentHourIndex = new Date().getHours();
                 const pastPressureIndex = Math.max(0, currentHourIndex - 3); 
-                const pastPressure = hourly.surface_pressure[pastPressureIndex];
-                const pressureDiff = current.surface_pressure - pastPressure;
+                const pastPressure = (hourly.surface_pressure && hourly.surface_pressure.length > pastPressureIndex) ? hourly.surface_pressure[pastPressureIndex] : 0;
+                const currentPressure = current.surface_pressure || 0;
+                const pressureDiff = currentPressure - pastPressure;
                 
                 let trendIcon = "〰️"; 
                 if (pressureDiff <= -2.0) trendIcon = "📉 (Storm Drop!)";
@@ -858,44 +1045,18 @@
                 else if (pressureDiff >= 2.0) trendIcon = "📈 (Clearing!)";
                 else if (pressureDiff >= 0.5) trendIcon = "📈";
                 
-                const pressureInHg = (current.surface_pressure * 0.02953).toFixed(2);
+                const pressureInHg = (currentPressure * 0.02953).toFixed(2);
                 document.getElementById('pressure').innerText = `${pressureInHg} ${trendIcon}`;
-
-                const aqi = aqiData.current.us_aqi;
-                const pm25 = aqiData.current.pm2_5;
-                const pm10 = aqiData.current.pm10;
-                const ozone = aqiData.current.ozone;
-
-                let aqiStatus = `${aqi} (Good 🫧)`;
-                if (aqi > 50) aqiStatus = `${aqi} (Moderate 🍂)`;
-                if (aqi > 100) aqiStatus = `${aqi} (Poor ⚠️)`;
-                if (aqi > 150) aqiStatus = `${aqi} (Hazardous 🚫)`;
-                document.getElementById('aqi-score').innerText = aqiStatus;
-
-                let pm25Status = "Low 🍃";
-                if (pm25 > 12) pm25Status = "Moderate 🍂";
-                if (pm25 > 35) pm25Status = "High ⚠️";
-                document.getElementById('aqi-pm25').innerText = `${pm25} μg/m³ (${pm25Status})`;
-
-                let pm10Status = "Low 🍃";
-                if (pm10 > 54) pm10Status = "Moderate 🍂";
-                if (pm10 > 154) pm10Status = "High ⚠️";
-                document.getElementById('aqi-pm10').innerText = `${pm10} μg/m³ (${pm10Status})`;
-
-                let ozoneStatus = "Low 🌸";
-                if (ozone > 60) ozoneStatus = "Moderate ☁️";
-                if (ozone > 120) ozoneStatus = "High ⚠️";
-                document.getElementById('aqi-ozone').innerText = `${ozone} μg/m³ (${ozoneStatus})`;
 
                 setVibeIndex(currentTemp);
                 
-                const currentCode = current.weather_code;
+                const currentCode = current.weather_code || 0;
                 document.getElementById('status').innerText = `${weatherDescriptions[currentCode] || "Vibing"} ${weatherMoji[currentCode] || "✨"}`;
 
-                const myRealFeel = customRealFeel(current.temperature_2m, current.wind_speed_10m, current.relative_humidity_2m);
+                const myRealFeel = customRealFeel(currentTemp, current.wind_speed_10m || 0, currentHumidity);
                 document.getElementById('apparent').innerText = myRealFeel;
 
-                const currentUV = Math.round(current.uv_index);
+                const currentUV = Math.round(current.uv_index || 0);
                 document.getElementById('uv-number').innerText = currentUV;
                 document.getElementById('uv-text').innerText = getUVSpeech(currentUV);
 
@@ -906,42 +1067,48 @@
 
                 const isDaytime = current.is_day === 1;
                 setAtmosphereScanner(
-                    current.cloud_cover_low, 
-                    current.cloud_cover_mid, 
-                    current.cloud_cover_high, 
-                    current.cloud_cover, 
+                    current.cloud_cover_low || 0, 
+                    current.cloud_cover_mid || 0, 
+                    current.cloud_cover_high || 0, 
+                    current.cloud_cover || 0, 
                     isDaytime
                 );
 
                 const isNight = current.is_day === 0;
-                setNightSkyClarity(isNight, current.cloud_cover);
+                setNightSkyClarity(isNight, current.cloud_cover || 0);
 
                 const minList = document.getElementById('minutely-list');
                 minList.innerHTML = '';
-                const nowMs = Date.now();
-                let minStartIndex = 0;
                 
-                for(let i=0; i < data.minutely_15.time.length; i++) {
-                    if(new Date(data.minutely_15.time[i]).getTime() >= nowMs - (15 * 60000)) { 
-                        minStartIndex = i;
-                        break;
-                    }
-                }
-
-                for(let i=0; i<4; i++){
-                    let pVal = data.minutely_15.precipitation[minStartIndex + i] || 0;
-                    let timeLabel = `+${(i+1)*15}m`;
-                    let valText = pVal > 0 ? `${pVal}"` : '0"';
-                    let textColor = pVal > 0 ? 'var(--mermaid-aqua)' : 'var(--deep-sea)';
+                if (data.minutely_15 && data.minutely_15.time && data.minutely_15.time.length > 0) {
+                    const nowMs = Date.now();
+                    let minStartIndex = 0;
                     
-                    minList.innerHTML += `
-                        <div class="minutely-col">
-                            <div class="minutely-time">${timeLabel}</div>
-                            <div class="minutely-val" style="color: ${textColor}">${valText}</div>
-                        </div>
-                    `;
+                    for(let i=0; i < data.minutely_15.time.length; i++) {
+                        if(new Date(data.minutely_15.time[i]).getTime() >= nowMs - (15 * 60000)) { 
+                            minStartIndex = i;
+                            break;
+                        }
+                    }
+
+                    for(let i=0; i<4; i++){
+                        let pVal = data.minutely_15.precipitation[minStartIndex + i] || 0;
+                        let timeLabel = `+${(i+1)*15}m`;
+                        let valText = pVal > 0 ? `${pVal}"` : '0"';
+                        let textColor = pVal > 0 ? 'var(--mermaid-aqua)' : 'var(--deep-sea)';
+                        
+                        minList.innerHTML += `
+                            <div class="minutely-col">
+                                <div class="minutely-time">${timeLabel}</div>
+                                <div class="minutely-val" style="color: ${textColor}">${valText}</div>
+                            </div>
+                        `;
+                    }
+                } else {
+                    minList.innerHTML = `<div style="width:100%; text-align:center; padding:10px; color:var(--deep-sea); font-size:0.8rem; font-weight:700;">No minutely radar available for this zone 🫧</div>`;
                 }
 
+                // ✨ UPDATED: HOURLY LOOP WITH SPLIT PRECIPITATION STACK ✨
                 const hourlyList = document.getElementById('hourly-list');
                 hourlyList.innerHTML = '';
                 if (hourly && hourly.temperature_2m) {
@@ -952,47 +1119,61 @@
                         const hTime = getMathematicalHour(i);
                         const hTemp = Math.round(hourly.temperature_2m[dataIdx]);
                         const hIcon = weatherMoji[hourly.weather_code[dataIdx]] || "✨";
-                        const hPop = hourly.precipitation_probability[dataIdx];
-                        const hPrecip = hourly.precipitation[dataIdx];
-                        
-                        let precipText = hPrecip > 0 ? `💧 ${hPrecip}"` : `💧 ${hPop}%`; 
+                        const hPop = hourly.precipitation_probability[dataIdx] || 0;
+                        const hPrecip = hourly.precipitation[dataIdx] || 0;
                         
                         hourlyList.innerHTML += `
                             <div class="hourly-box">
                                 <div class="hourly-time">${hTime}</div>
                                 <div class="hourly-icon">${hIcon}</div>
                                 <div class="hourly-temp">${hTemp}°</div>
-                                <div class="hourly-precip">${precipText}</div>
+                                <div class="hourly-precip">☂️ ${hPop}%</div>
+                                <div class="hourly-precip">💧 ${hPrecip}"</div>
                             </div>
                         `;
                     }
                 }
 
+                // ✨ UPDATED: DAILY LOOP WITH DEDICATED COLUMNS & SMART TEXT ✨
                 const forecastList = document.getElementById('forecast-list');
                 forecastList.innerHTML = ''; 
+                
+                const safeDailyTempsMax = daily.temperature_2m_max || Array(7).fill(50);
+                const safeDailyTempsMin = daily.temperature_2m_min || Array(7).fill(50);
+                const safeDailyPrecipSum = daily.precipitation_sum || Array(7).fill(0);
+                const safeDailyGusts = daily.wind_gusts_10m_max || Array(7).fill(0);
+
                 if (daily && daily.weather_code) {
                     for (let i = 0; i < 7; i++) {
                         const dayName = getDayName(i); 
                         const emoji = weatherMoji[daily.weather_code[i]] || "✨";
-                        const maxTemp = Math.round(daily.temperature_2m_max[i]);
-                        const minTemp = Math.round(daily.temperature_2m_min[i]);
-                        const rainTotal = daily.precipitation_sum[i];
-                        const rainPop = daily.precipitation_probability_max[i];
-                        const uvMax = Math.round(daily.uv_index_max[i] || 0);
-                        const windMax = Math.round(daily.wind_speed_10m_max[i] || 0);
+                        const maxTemp = Math.round(safeDailyTempsMax[i]);
+                        const minTemp = Math.round(safeDailyTempsMin[i]);
+                        const rainTotal = safeDailyPrecipSum[i];
+                        const rainPop = daily.precipitation_probability_max ? daily.precipitation_probability_max[i] : 0;
+                        const uvMax = Math.round((daily.uv_index_max && daily.uv_index_max[i]) ? daily.uv_index_max[i] : 0);
+                        const windMax = Math.round((daily.wind_speed_10m_max && daily.wind_speed_10m_max[i]) ? daily.wind_speed_10m_max[i] : 0);
 
-                        let rainDisplay = rainTotal > 0 ? `${rainTotal}"` : `${rainPop}%`;
+                        // Smart Text Logic for Rain Analysis
+                        let smartRainText = "No precipitation expected today.";
+                        if (rainPop > 0) {
+                            if (rainPop > 70 && rainTotal > 0.5) smartRainText = "Heavy, sustained rain expected today.";
+                            else if (rainPop < 40 && rainTotal > 0.2) smartRainText = "Low overall chance, but potential for sudden heavy downpours.";
+                            else if (rainPop > 60 && rainTotal < 0.1) smartRainText = "High chance of very light, passing mist or drizzle.";
+                            else if (rainTotal > 0) smartRainText = "Standard scattered showers expected.";
+                        }
 
                         forecastList.innerHTML += `
                             <div class="forecast-item" onclick="toggleDetails(this)">
                                 <div class="forecast-row">
                                     <div class="forecast-day">${dayName}</div>
                                     <div class="forecast-icon">${emoji}</div>
-                                    <div class="forecast-rain">💧 ${rainDisplay}</div>
+                                    <div class="forecast-chance">☂️ ${rainPop}%</div>
+                                    <div class="forecast-volume">💧 ${rainTotal}"</div>
                                     <div class="forecast-temps">${maxTemp}° <span class="min-temp">${minTemp}°</span></div>
                                 </div>
                                 <div class="forecast-details">
-                                    <p>🌧️ <span>Max Chance of Rain:</span> ${rainPop}%</p>
+                                    <p>🌧️ <span>Analysis:</span> ${smartRainText}</p>
                                     <p>🌬️ <span>Highest Wind:</span> ${windMax} mph</p>
                                     <p>🧴 <span>Peak UV Index:</span> ${uvMax}</p>
                                 </div>
@@ -1001,14 +1182,29 @@
                     }
                 }
 
+                if (window.ClimateEngine && window.floraDB) {
+                    const rainTotal = safeDailyPrecipSum.reduce((a, b) => a + b, 0);
+                    const avgTemp = (safeDailyTempsMin.reduce((a, b) => a + b, 0) + safeDailyTempsMax.reduce((a, b) => a + b, 0)) / 14;
+                    const avgHumidity = currentHumidity; 
+                    const moonPhaseStr = moonData.phaseInfo.n;
+
+                    const agronomyResults = window.ClimateEngine.runAnalysis(
+                        latitude, longitude, safeDailyTempsMin, safeDailyTempsMax, safeDailyGusts, avgTemp, avgHumidity, rainTotal, moonPhaseStr
+                    );
+
+                    renderAgronomy(agronomyResults);
+                } else {
+                    document.getElementById('agronomy-list').innerHTML = "<p style='font-size:0.8rem; color:var(--deep-sea); text-align:center;'>Waiting for flora_db.js and climate_db.js... 🫧</p>";
+                }
+
                 document.getElementById('loading').style.display = 'none';
                 document.getElementById('weather-content').style.display = 'block';
             } catch (error) {
+                console.error(error);
                 document.getElementById('loading').innerText = "(✖╭╮✖) Data loading error...";
             }
         }
 
-        // ✨ INITIAL FETCH LOGIC ✨
         async function fetchWeather(overrideLat = null, overrideLon = null, customName = null) {
             document.getElementById('loading').style.display = 'block';
             document.getElementById('weather-content').style.display = 'none';
@@ -1057,4 +1253,4 @@
         });
     </script>
 </body>
-</html>
+    </html>
